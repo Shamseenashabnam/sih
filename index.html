@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rockfall Prediction Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f4f4; margin:0; padding:2rem; }
+    .container { max-width: 600px; margin:auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.1);}
+    h1 { text-align:center; }
+    .preview { margin-top:10px; max-width:100%; border-radius:6px; }
+    .btn { background:#2b8cff; color:#fff; padding:10px 16px; border:none; border-radius:6px; cursor:pointer; }
+    .result { margin-top:20px; padding:15px; background:#f0f8ff; border-radius:6px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Rockfall Risk Prediction</h1>
+    <input type="file" id="fileInput" accept="image/*" />
+    <button class="btn" onclick="uploadImage()">Predict</button>
+    <img id="preview" class="preview"/>
+    <div id="result" class="result" style="display:none;"></div>
+  </div>
+
+  <script>
+    async function uploadImage() {
+      const file = document.getElementById("fileInput").files[0];
+      if (!file) { alert("Select an image first"); return; }
+
+      document.getElementById("preview").src = URL.createObjectURL(file);
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("http://127.0.0.1:8000/predict", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+      document.getElementById("result").style.display="block";
+      document.getElementById("result").innerHTML = `
+        <h3>Prediction Result</h3>
+        <p><b>Label:</b> ${data.label}</p>
+        <p><b>Probability:</b> ${(data.probability*100).toFixed(2)}%</p>
+      `;
+    }
+  </script>
+</body>
+</html>
